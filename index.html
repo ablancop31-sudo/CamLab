@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>CAMLAB — Entrenador GH5</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <p class="eyebrow">ENTRENADOR PERSONAL · LUMIX GH5</p>
+        <h1>CAMLAB</h1>
+      </div>
+      <div class="xp-pill"><span id="xp">0</span> XP</div>
+    </header>
+
+    <main>
+      <section id="home" class="screen active">
+        <div class="hero card">
+          <div>
+            <p class="kicker">Tu objetivo</p>
+            <h2>Dominar la cámara bajo presión.</h2>
+            <p>Aprende a decidir rápido qué tocar cuando una foto deportiva sale movida, oscura, ruidosa o desenfocada.</p>
+          </div>
+          <button class="primary" onclick="go('quiz')">Entrenamiento de hoy</button>
+        </div>
+
+        <div class="grid2">
+          <button class="card action" onclick="go('learn')">
+            <span class="icon">📚</span>
+            <strong>Aprender</strong>
+            <small>ISO, SS, F, modos y enfoque</small>
+          </button>
+          <button class="card action" onclick="go('sim')">
+            <span class="icon">🎛️</span>
+            <strong>Simulador</strong>
+            <small>Compensa exposición y movimiento</small>
+          </button>
+          <button class="card action" onclick="go('assist')">
+            <span class="icon">🏀</span>
+            <strong>Modo partido</strong>
+            <small>Configuración de partida rápida</small>
+          </button>
+          <button class="card action" onclick="go('progress')">
+            <span class="icon">📈</span>
+            <strong>Progreso</strong>
+            <small>Qué dominas y qué debes repasar</small>
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="row between">
+            <div>
+              <p class="kicker">Racha</p>
+              <h3><span id="streak">0</span> días</h3>
+            </div>
+            <div class="big-emoji">🔥</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="learn" class="screen">
+        <div class="screen-head">
+          <button class="back" onclick="go('home')">←</button>
+          <div><p class="eyebrow">CURSO</p><h2>Fundamentos</h2></div>
+        </div>
+        <div id="lessons"></div>
+      </section>
+
+      <section id="quiz" class="screen">
+        <div class="screen-head">
+          <button class="back" onclick="go('home')">←</button>
+          <div><p class="eyebrow">ENTRENAMIENTO</p><h2>Decide rápido</h2></div>
+        </div>
+        <div id="quizCard" class="card quiz-card"></div>
+      </section>
+
+      <section id="sim" class="screen">
+        <div class="screen-head">
+          <button class="back" onclick="go('home')">←</button>
+          <div><p class="eyebrow">SIMULADOR</p><h2>Triángulo de exposición</h2></div>
+        </div>
+
+        <div class="card">
+          <p class="scenario">🏀 Pabellón interior · acción rápida</p>
+          <div class="sim-values">
+            <div><small>ISO</small><strong id="isoOut">1600</strong></div>
+            <div><small>SS</small><strong id="ssOut">1/250</strong></div>
+            <div><small>F</small><strong id="fOut">2.8</strong></div>
+          </div>
+        </div>
+
+        <div class="card controls">
+          <label>ISO <input id="isoRange" type="range" min="0" max="6" value="3" /></label>
+          <label>SS <input id="ssRange" type="range" min="0" max="7" value="3" /></label>
+          <label>F <input id="fRange" type="range" min="0" max="6" value="1" /></label>
+        </div>
+
+        <div class="card">
+          <h3>Resultado estimado</h3>
+          <div class="meter-row"><span>Movimiento</span><div class="meter"><i id="moveMeter"></i></div><b id="moveText"></b></div>
+          <div class="meter-row"><span>Luz</span><div class="meter"><i id="lightMeter"></i></div><b id="lightText"></b></div>
+          <div class="meter-row"><span>Ruido</span><div class="meter"><i id="noiseMeter"></i></div><b id="noiseText"></b></div>
+          <div class="tip" id="simTip"></div>
+        </div>
+      </section>
+
+      <section id="assist" class="screen">
+        <div class="screen-head">
+          <button class="back" onclick="go('home')">←</button>
+          <div><p class="eyebrow">MODO PARTIDO</p><h2>¿Qué vas a grabar?</h2></div>
+        </div>
+        <div class="card">
+          <label class="select-label">Uso
+            <select id="useType">
+              <option value="photo">Fotografía</option>
+              <option value="video">Vídeo</option>
+            </select>
+          </label>
+          <label class="select-label">Escena
+            <select id="sceneType">
+              <option value="fast">Acción rápida</option>
+              <option value="general">Juego general</option>
+              <option value="portrait">Jugador quieto / retrato</option>
+            </select>
+          </label>
+          <label class="select-label">Luz
+            <select id="lightType">
+              <option value="indoor">Pabellón</option>
+              <option value="outdoor">Exterior</option>
+            </select>
+          </label>
+          <button class="primary" onclick="buildAssist()">Dame un punto de partida</button>
+        </div>
+        <div id="assistResult"></div>
+      </section>
+
+      <section id="progress" class="screen">
+        <div class="screen-head">
+          <button class="back" onclick="go('home')">←</button>
+          <div><p class="eyebrow">PROGRESO</p><h2>Tu dominio</h2></div>
+        </div>
+        <div id="progressBars" class="card"></div>
+        <button class="secondary" onclick="resetProgress()">Reiniciar progreso</button>
+      </section>
+    </main>
+
+    <nav>
+      <button onclick="go('home')">⌂<span>Inicio</span></button>
+      <button onclick="go('learn')">▤<span>Aprender</span></button>
+      <button onclick="go('quiz')">⚡<span>Test</span></button>
+      <button onclick="go('sim')">◉<span>Simular</span></button>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
