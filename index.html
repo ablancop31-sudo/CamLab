@@ -46,6 +46,11 @@
             <strong>Modo partido</strong>
             <small>Configuración de partida rápida</small>
           </button>
+          <button class="card action" onclick="go('practice')">
+            <span class="icon">🎮</span>
+            <strong>Corrige la foto</strong>
+            <small>Ajusta ISO, SS y F hasta resolverla</small>
+          </button>
           <button class="card action" onclick="go('progress')">
             <span class="icon">📈</span>
             <strong>Progreso</strong>
@@ -138,6 +143,42 @@
           <button class="primary" onclick="buildAssist()">Dame un punto de partida</button>
         </div>
         <div id="assistResult"></div>
+      </section>
+
+
+      <section id="practice" class="screen">
+        <div class="screen-head">
+          <button class="back" onclick="go('home')">←</button>
+          <div><p class="eyebrow">PRÁCTICA</p><h2>Corrige la foto</h2></div>
+        </div>
+
+        <div class="card">
+          <span class="badge">Nivel 1 · Baloncesto · Pabellón</span>
+          <p class="scenario">El jugador entra a canasta. Congela el movimiento y consigue una exposición equilibrada.</p>
+          <div class="practice-stage">
+            <img id="practiceImage" src="practice-basketball.png" alt="Escena de baloncesto para practicar">
+            <div class="practice-overlay">
+              <span id="pIsoLabel">ISO 800</span>
+              <span id="pSsLabel">SS 1/125</span>
+              <span id="pFLabel">F 4.0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card controls">
+          <label>ISO <b id="pIsoOut">800</b><input id="pIso" type="range" min="0" max="6" value="2"></label>
+          <label>SS <b id="pSsOut">1/125</b><input id="pSs" type="range" min="0" max="7" value="1"></label>
+          <label>F <b id="pFOut">4.0</b><input id="pF" type="range" min="0" max="6" value="2"></label>
+          <button class="secondary" onclick="resetPractice()">Reiniciar</button>
+        </div>
+
+        <div class="card">
+          <div class="row between"><h3>Resultado</h3><div class="score-box"><span id="practiceScore">0</span>/100</div></div>
+          <div class="meter-row"><span>Movimiento</span><div class="meter"><i id="pMoveMeter"></i></div><b id="pMoveText"></b></div>
+          <div class="meter-row"><span>Exposición</span><div class="meter"><i id="pLightMeter"></i></div><b id="pLightText"></b></div>
+          <div class="meter-row"><span>Ruido</span><div class="meter"><i id="pNoiseMeter"></i></div><b id="pNoiseText"></b></div>
+          <div class="tip" id="practiceTip"></div>
+        </div>
       </section>
 
       <section id="progress" class="screen">

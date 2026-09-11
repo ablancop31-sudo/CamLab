@@ -58,3 +58,10 @@ nav button{width:min(24%,160px);background:none;border:0;color:#d1d5db;font-size
 nav span{display:block;font-size:10px;margin-top:3px;color:#94a3b8}
 .scenario{color:#cbd5e1}
 @media(max-width:420px){.grid2{grid-template-columns:1fr 1fr}.action{min-height:132px;padding:15px}h2{font-size:24px}}
+
+.practice-stage{position:relative;border-radius:16px;overflow:hidden;background:#070b14;margin-top:12px}
+.practice-stage img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;transition:filter .18s ease}
+.practice-overlay{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:7px;background:rgba(0,0,0,.72);padding:7px 10px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
+.practice-overlay span+span{border-left:1px solid rgba(255,255,255,.3);padding-left:7px}
+.controls label b{float:right}
+.score-box{border:1px solid #2f7d4e;background:#0f2a1b;color:#66e59a;padding:8px 10px;border-radius:12px;font-weight:900}

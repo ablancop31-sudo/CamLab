@@ -79,27 +79,42 @@ const ssVals=[60,125,200,250,500,800,1000,1600];
 const fVals=[1.8,2.8,4,5.6,8,11,16];
 
 function updateSim(){
-  const iso=isoVals[+isoRange.value], ss=ssVals[+ssRange.value], f=fVals[+fRange.value];
-  isoOut.textContent=iso; ssOut.textContent='1/'+ss; fOut.textContent=f.toFixed(1);
+  const isoRangeEl = document.getElementById('isoRange');
+  const ssRangeEl = document.getElementById('ssRange');
+  const fRangeEl = document.getElementById('fRange');
+  if(!isoRangeEl || !ssRangeEl || !fRangeEl) return;
+
+  const iso=isoVals[+isoRangeEl.value], ss=ssVals[+ssRangeEl.value], f=fVals[+fRangeEl.value];
+  document.getElementById('isoOut').textContent=iso;
+  document.getElementById('ssOut').textContent='1/'+ss;
+  document.getElementById('fOut').textContent=f.toFixed(1);
+
   let move=Math.min(100, Math.max(10, 20 + (Math.log2(ss/125))*27));
   let noise=Math.min(100, Math.max(5, 12 + (Math.log2(iso/400))*18));
-  // referencia aproximada: ISO1600, 1/250, F2.8 = exposición media
   let ev = Math.log2(iso/1600) - Math.log2(ss/250) - 2*Math.log2(f/2.8);
   let light=Math.max(5, Math.min(100, 58 + ev*22));
+
   setMeter('move',move, move>72?'Muy buena':move>48?'Aceptable':'Movido');
   setMeter('noise',noise, noise>70?'Alto':noise>40?'Medio':'Bajo');
   setMeter('light',light, light>75?'Clara':light>38?'Correcta':'Oscura');
+
   let tip='';
   if(move<48) tip='Primero resolvería el movimiento: sube SS. Después compensa la pérdida de luz.';
   else if(light<38) tip='Has congelado bien, pero falta luz. Prueba a subir ISO o abrir F.';
   else if(noise>72) tip='La exposición funciona, pero estás pagando mucho en ruido. Si puedes, abre F antes de bajar SS.';
   else tip='Configuración equilibrada para esta simulación. Ahora piensa qué sacrificio aceptarías si cambia la luz.';
-  simTip.textContent=tip;
+  document.getElementById('simTip').textContent=tip;
 }
 function setMeter(id,v,text){document.getElementById(id+'Meter').style.width=v+'%';document.getElementById(id+'Text').textContent=text}
 
 function buildAssist(){
-  const use=useType.value, scene=sceneType.value, light=lightType.value;
+  const useEl=document.getElementById('useType');
+  const sceneEl=document.getElementById('sceneType');
+  const lightEl=document.getElementById('lightType');
+  const resultEl=document.getElementById('assistResult');
+  if(!useEl || !sceneEl || !lightEl || !resultEl) return;
+
+  const use=useEl.value, scene=sceneEl.value, light=lightEl.value;
   let html='';
   if(use==='photo'){
     let ss = scene==='fast'?'1/800–1/1000':scene==='general'?'1/500':'1/250';
@@ -120,11 +135,12 @@ function buildAssist(){
       <b>WB:</b> fija Kelvin si el pabellón cambia de color entre planos.
     </div></div>`;
   }
-  assistResult.innerHTML=html;
+  resultEl.innerHTML=html;
 }
 function renderProgress(){
   const names={SS:'SS / movimiento',ISO:'ISO / ruido',F:'F / apertura',MODOS:'Modos',AF:'Enfoque',WB:'Balance blancos'};
-  progressBars.innerHTML=Object.keys(names).map(k=>{
+  const progressBarsEl=document.getElementById('progressBars');
+  progressBarsEl.innerHTML=Object.keys(names).map(k=>{
     const s=state.skills[k]||{c:0,t:0}; const pct=s.t?Math.round(s.c/s.t*100):0;
     return `<div class="progress-item"><div class="progress-title"><span>${names[k]}</span><b>${pct}%</b></div><div class="progress-track"><i style="width:${pct}%"></i></div></div>`;
   }).join('') + `<div class="explain">Preguntas respondidas: <b>${state.answered||0}</b> · Aciertos: <b>${state.correct||0}</b></div>`;
@@ -138,4 +154,57 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderLessons();renderHeader();updateSim();
   ['isoRange','ssRange','fRange'].forEach(id=>document.getElementById(id).addEventListener('input',updateSim));
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+});
+
+
+function updatePractice(){
+  const isoEl=document.getElementById('pIso'), ssEl=document.getElementById('pSs'), fEl=document.getElementById('pF');
+  if(!isoEl || !ssEl || !fEl) return;
+
+  const iso=isoVals[+isoEl.value], ss=ssVals[+ssEl.value], f=fVals[+fEl.value];
+  document.getElementById('pIsoOut').textContent=iso;
+  document.getElementById('pSsOut').textContent='1/'+ss;
+  document.getElementById('pFOut').textContent=f.toFixed(1);
+  document.getElementById('pIsoLabel').textContent='ISO '+iso;
+  document.getElementById('pSsLabel').textContent='SS 1/'+ss;
+  document.getElementById('pFLabel').textContent='F '+f.toFixed(1);
+
+  let move=Math.min(100,Math.max(0,18 + Math.log2(ss/125)*30));
+  let noise=Math.min(100,Math.max(5,12 + Math.log2(iso/400)*18));
+  let ev=Math.log2(iso/1600)-Math.log2(ss/500)-2*Math.log2(f/2.8);
+  let exposure=Math.max(0,Math.min(100,100-Math.abs(ev)*28));
+  let noiseQuality=100-noise;
+  let score=Math.round(move*.45+exposure*.4+noiseQuality*.15);
+
+  setMeter('pMove',move,move>82?'Excelente':move>60?'Bien':'Movido');
+  setMeter('pLight',exposure,exposure>85?'Excelente':exposure>65?'Aceptable':'Mal');
+  setMeter('pNoise',noiseQuality,noise<40?'Bajo':noise<70?'Medio':'Alto');
+  document.getElementById('practiceScore').textContent=score;
+
+  const img=document.getElementById('practiceImage');
+  const brightness=Math.max(.42,Math.min(1.35, .82 + ev*.16));
+  const blur=Math.max(0, (500/ss - 1)*2.2);
+  img.style.filter=`brightness(${brightness}) blur(${blur}px)`;
+
+  let tip='';
+  if(move<60) tip='El principal problema es el movimiento. Sube SS antes de intentar arreglar la luz.';
+  else if(exposure<65 && ev<0) tip='Ya congelas bastante bien, pero falta luz. Abre F o sube ISO.';
+  else if(exposure<65 && ev>0) tip='La imagen está pasada de luz. Baja ISO, cierra F o sube SS.';
+  else if(noise>70) tip='La foto funciona, pero el ISO es muy alto. Intenta recuperar luz abriendo F antes de bajar SS.';
+  else if(score>=88) tip='¡Foto resuelta! Has equilibrado movimiento, exposición y ruido.';
+  else tip='Vas bien. Busca una combinación que mantenga SS alto sin disparar demasiado el ISO.';
+  document.getElementById('practiceTip').textContent=tip;
+}
+function resetPractice(){
+  document.getElementById('pIso').value=2;
+  document.getElementById('pSs').value=1;
+  document.getElementById('pF').value=2;
+  updatePractice();
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  ['pIso','pSs','pF'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('input',updatePractice);
+  });
+  updatePractice();
 });
